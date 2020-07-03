@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-171578300-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-171578300-1');
+  </script>
+
+  <meta charset="UTF-8">
+  <title>Touge.Pro</title>
+  <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Google+Sans:400,500,700">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZkEqhR6iO0vkccOqMo26LecfPIGpx838&callback=initMap&libraries=&v=weekly"
+    defer></script>
+  <style type="text/css">
+    /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <script>
+    (function (exports) {
+      "use strict";
+      var infoWindow;
+      var defaultZoom = 11;
+      var pos;
+      function CenterControl(controlDiv, map, marker) {
+
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '2px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.marginRight = '10px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to recenter the map';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '33px';
+        controlText.style.lineHeight = '38px';
+        controlText.style.paddingLeft = '6px';
+        controlText.style.paddingRight = '6px';
+        controlText.textContent = '⌖';
+        controlUI.appendChild(controlText);
+
+        // Setup the click event listeners: simply set the map to Chicago.
+        controlUI.addEventListener('click', function() {
+          var opacity = 1.0;
+          marker.setMap(null);
+          map.setCenter(pos);
+          marker.setPosition(pos);
+          marker.setMap(map);
+          map.setZoom(map.getZoom()+2);
+          (function fadeLoop(i) {
+            setTimeout(function() {
+            marker.setOpacity(opacity);
+            opacity -= 0.01
+            console.log(opacity);
+            if (--i) fadeLoop(i);
+           }, 150) //100ms
+          })(100); //execute 100x
+        });
+      }
+
+      function TrafficControl(trafficDiv, trafficLayer, map) {
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '2px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.marginTop = '10px';
+        controlUI.style.marginRight = '12px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to toggle Traffic Data';
+        trafficDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '18px';
+        controlText.style.lineHeight = '36px';
+        controlText.style.paddingLeft = '10px';
+        controlText.style.paddingRight = '10px';
+        controlText.textContent = 'Traffic';
+        controlUI.appendChild(controlText);
+
+        controlUI.addEventListener('click', function () {
+          if (trafficLayer.getMap()) {
+            trafficLayer.setMap(null);
+          } else {
+            trafficLayer.setMap(map);
+          }
+        });
+
+      }
+
+      function initMap() {
+
+        // style from google templates
+        var styledMapType = new google.maps.StyledMapType([
+          { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+          { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+          { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+          {
+            featureType: 'administrative.locality',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#d59563' }]
+          },
+          {
+            featureType: 'poi',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#d59563' }]
+          },
+          {
+            featureType: 'poi.park',
+            elementType: 'geometry',
+            stylers: [{ color: '#263c3f' }]
+          },
+          {
+            featureType: 'poi.park',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#6b9a76' }]
+          },
+          {
+            featureType: 'road',
+            elementType: 'geometry',
+            stylers: [{ color: '#38414e' }]
+          },
+          {
+            featureType: 'road',
+            elementType: 'geometry.stroke',
+            stylers: [{ color: '#212a37' }]
+          },
+          {
+            featureType: 'road',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#9ca5b3' }]
+          },
+          {
+            featureType: 'road.highway',
+            elementType: 'geometry',
+            stylers: [{ color: '#746855' }]
+          },
+          {
+            featureType: 'road.highway',
+            elementType: 'geometry.stroke',
+            stylers: [{ color: '#1f2835' }]
+          },
+          {
+            featureType: 'road.highway',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#f3d19c' }]
+          },
+          {
+            featureType: 'transit',
+            elementType: 'geometry',
+            stylers: [{ color: '#2f3948' }]
+          },
+          {
+            featureType: 'transit.station',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#d59563' }]
+          },
+          {
+            featureType: 'water',
+            elementType: 'geometry',
+            stylers: [{ color: '#17263c' }]
+          },
+          {
+            featureType: 'water',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#515c6d' }]
+          },
+          {
+            featureType: 'water',
+            elementType: 'labels.text.stroke',
+            stylers: [{ color: '#17263c' }]
+          }
+        ],
+          { name: 'Styled Map' }
+        );
+        exports.map = new google.maps.Map(document.getElementById("map"), {
+          center: {
+            lat: 38.7810426,
+            lng: -9.4188726
+          },
+          zoom: defaultZoom,
+          streetViewControl: false,
+          mapTypeControlOptions: {
+            mapTypeIds: ['styled_map', 'roadmap', 'hybrid', 'terrain']
+          }
+        });
+        // Create the DIV to hold the control and call the TrafficControl()
+        // constructor passing in this DIV.
+        var trafficLayer = new google.maps.TrafficLayer();
+        var trafficControlDiv = document.createElement('div');
+        var trafficControl = new TrafficControl(trafficControlDiv, trafficLayer, map);
+        trafficControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(trafficControlDiv);
+
+        // Try HTML5 geolocation.
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function (position) {
+            pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            //infoWindow.setPosition(pos);
+            infoWindow.setContent(JSON.stringify(pos));
+            infoWindow.open(map);
+            map.setCenter(pos);
+            map.setZoom(defaultZoom)
+          }, function () {
+            handleLocationError(true, infoWindow, map.getCenter());
+          });
+        } else {
+          // Browser doesn't support Geolocation
+          handleLocationError(false, infoWindow, map.getCenter());
+        }
+        var marker = new google.maps.Marker({
+              position: pos,
+              title:"Your Location",
+              animation: google.maps.Animation.BOUNCE
+        });
+        // Create the DIV to hold the control and call the CenterControl()
+        // constructor passing in this DIV.
+        var centerControlDiv = document.createElement('div');
+        var centerControl = new CenterControl(centerControlDiv, map, marker);
+        centerControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(centerControlDiv);
+        infoWindow = new google.maps.InfoWindow;
+
+
+        map.mapTypes.set('styled_map', styledMapType);
+        map.setMapTypeId('styled_map');
+
+        var src = 'https://touge.pro/map.kml?version=2';
+        var kmlLayer = new google.maps.KmlLayer(src, {
+          suppressInfoWindows: false,
+          preserveViewport: true,
+          map: map
+        });
+
+
+      }
+      function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+          'Error: The Geolocation service failed.' :
+          'Error: Your browser doesn\'t support geolocation.');
+        infoWindow.open(map);
+      }
+      exports.initMap = initMap;
+    })((this.window = this.window || {}));
+    //ffff6712
+  </script>
+</head>
+
+<body>
+  <div id="map"></div>
+</body>
+
+</html>
