@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <title>Touge.Pro</title>
-    <link rel="stylesheet" href="https://touge.pro/map/static/ol.css" type="text/css">
-    <script src="https://touge.pro/map/static/ol.js"></script>
+    <link rel="stylesheet" href="/static/ol.css" type="text/css">
+    <script src="/static/ol.js"></script>
     <style>
       html body .map {
         height: 100%;
@@ -34,7 +34,7 @@
             }),
             new ol.layer.Vector({
                 source: new ol.source.Vector({
-                    url: "https://touge.pro/map/map.kml",
+                    url: "https://touge.pro/map.xml",
                     format: new ol.format.KML({
                         extractStyles: true
                     })

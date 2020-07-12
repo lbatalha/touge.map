@@ -3,14 +3,14 @@
 
 <head>
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-171578300-1"></script>
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-171578300-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
     gtag('config', 'UA-171578300-1');
-  </script>
+  </script> -->
 
   <meta charset="UTF-8">
   <title>Touge.Pro</title>
@@ -78,7 +78,6 @@
             setTimeout(function() {
             marker.setOpacity(opacity);
             opacity -= 0.01
-            console.log(opacity);
             if (--i) fadeLoop(i);
            }, 150) //100ms
           })(100); //execute 100x
@@ -262,7 +261,7 @@
         map.mapTypes.set('styled_map', styledMapType);
         map.setMapTypeId('styled_map');
 
-        var src = 'https://touge.pro/map.kml?version=2';
+        var src = 'https://touge.pro/map.xml?version=7';
         var kmlLayer = new google.maps.KmlLayer(src, {
           suppressInfoWindows: false,
           preserveViewport: true,

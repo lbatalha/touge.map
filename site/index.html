@@ -14,11 +14,13 @@
     <title>Touge.Pro</title>
     <link rel="stylesheet" href="/static/leaflet.css"></link>
     <link rel="stylesheet" href="/static/mapbox-gl.css"></link>
+    <link rel="stylesheet" href="/static/easy-button.css"></link>
     <script type="text/javascript" src="/static/mapbox-gl.js"></script>
     <script type="text/javascript" src="/static/leaflet.js"></script>
     <script type="text/javascript" src="/static/esri-leaflet.js"></script>
     <script type="text/javascript" src="/static/esri-leaflet-vector.js"></script>
     <script type="text/javascript" src="/static/L.KML.js"></script>
+    <script type="text/javascript" src="/static/easy-button.js"></script>
     <style>
       #map {
         height: 100%;
@@ -38,6 +40,14 @@
       var basePos = [38.7810426,-9.4188726];
       var baseZoom = 11;
       var tileServer = "";
+      var cLoc;
+      var locMarker = L.marker([0,0]);
+      var locCircle= L.circle([0,0],0);
+
+      const locIcon = L.icon({
+        iconUrl: '/static/red.png',
+        iconAnchor: [16,32]
+      });
 
       function init() {
         var map = L.map('map')
@@ -63,6 +73,30 @@
             //const bounds = track.getBounds();
             //map.fitBounds(bounds);
           });
+          map.locate({watch: true, setView: false, enableHighAccuracy: true});
+
+          L.easyButton('&target;', function(){
+            map.setView(cLoc, baseZoom + 2);
+
+          }).addTo(map);
+
+          function onLocationFound(e) {
+            var radius = e.accuracy;
+            locMarker.remove();
+            locMarker = L.marker(e.latlng, {icon: locIcon}).addTo(map);
+            locCircle.remove();
+            locCircle = L.circle(e.latlng, radius, {
+              weight: 0.2,
+              fillOpacity: 0.05
+            }).addTo(map);
+            cLoc = e.latlng;
+          ;}
+          function onLocationError(e) {
+            alert(e.message);
+          }
+
+          map.on('locationerror', onLocationError);
+          map.on('locationfound', onLocationFound);
 
       }
 
