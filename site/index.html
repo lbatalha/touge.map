@@ -12,6 +12,7 @@
     </script>
     <meta charset="UTF-8">
     <title>Touge.Pro</title>
+    <link rel="stylesheet" href="/static/leaflet-view-meta.css"></script>
     <link rel="stylesheet" href="/static/leaflet.css"></link>
     <link rel="stylesheet" href="/static/mapbox-gl.css"></link>
     <link rel="stylesheet" href="/static/easy-button.css"></link>
@@ -21,6 +22,7 @@
     <script type="text/javascript" src="/static/esri-leaflet-vector.js"></script>
     <script type="text/javascript" src="/static/L.KML.js"></script>
     <script type="text/javascript" src="/static/easy-button.js"></script>
+    <script type="text/javascript" src="/static/leaflet-view-meta.js"></script>
     <style>
       #map {
         height: 100%;
@@ -52,12 +54,9 @@
       function init() {
         var map = L.map('map')
         map.setView(basePos, baseZoom)
-        // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        //   maxZoom: 19,
-        //   attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-        // }).addTo(map);
 
-        var layer = L.esri.Vector.basemap('StreetsNight').addTo(map);
+
+        var baselayer = L.esri.Vector.basemap('StreetsNight').addTo(map);
 
         // Load kml file
         fetch('map.xml')
@@ -69,15 +68,17 @@
             const track = new L.KML(kml);
             map.addLayer(track);
 
-            // Adjust map to show the kml
+            // Adjust map view to show the kml
             //const bounds = track.getBounds();
             //map.fitBounds(bounds);
           });
+
+          // GeoLocation Start
           map.locate({watch: true, setView: false, enableHighAccuracy: true});
 
+          //
           L.easyButton('&target;', function(){
             map.setView(cLoc, baseZoom + 2);
-
           }).addTo(map);
 
           function onLocationFound(e) {
@@ -99,7 +100,6 @@
           map.on('locationfound', onLocationFound);
 
       }
-
     </script>
   </head>
   <body onload="init();">
