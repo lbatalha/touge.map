@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-171578300-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-171578300-1');
+    </script>
+    <meta charset="UTF-8">
+    <title>Touge.Pro</title>
+    <link rel="stylesheet" href="/static/leaflet-view-meta.css"></script>
+    <link rel="stylesheet" href="/static/leaflet.css"></link>
+    <link rel="stylesheet" href="/static/mapbox-gl.css"></link>
+    <link rel="stylesheet" href="/static/easy-button.css"></link>
+    <script type="text/javascript" src="/static/mapbox-gl.js"></script>
+    <script type="text/javascript" src="/static/leaflet.js"></script>
+    <script type="text/javascript" src="/static/esri-leaflet.js"></script>
+    <script type="text/javascript" src="/static/esri-leaflet-vector.js"></script>
+    <script type="text/javascript" src="/static/L.KML.js"></script>
+    <script type="text/javascript" src="/static/easy-button.js"></script>
+    <script type="text/javascript" src="/static/leaflet-view-meta.js"></script>
+    <style>
+      #map {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
+      }
+    </style>
+
+
+    <script>
+      var basePos = [38.7810426,-9.4188726];
+      var baseZoom = 11;
+      var tileServer = "";
+      var cLoc;
+      var locMarker = L.marker([0,0]);
+      var locCircle= L.circle([0,0],0);
+
+      const locIcon = L.icon({
+        iconUrl: '/static/red.png',
+        iconAnchor: [16,32]
+      });
+
+      function init() {
+        var map = L.map('map')
+        map.setView(basePos, baseZoom)
+
+
+        var baselayer = L.esri.Vector.basemap('StreetsNight').addTo(map);
+
+        // Load kml file
+        fetch('map.xml')
+          .then(res => res.text())
+          .then(kmltext => {
+            // Create new kml overlay
+            const parser = new DOMParser();
+            const kml = parser.parseFromString(kmltext, 'text/xml');
+            const track = new L.KML(kml);
+            map.addLayer(track);
+
+            // Adjust map view to show the kml
+            //const bounds = track.getBounds();
+            //map.fitBounds(bounds);
+          });
+
+          // GeoLocation Start
+          map.locate({watch: true, setView: false, enableHighAccuracy: true});
+
+          //
+          L.easyButton('&target;', function(){
+            map.setView(cLoc, baseZoom + 2);
+          }).addTo(map);
+
+          function onLocationFound(e) {
+            var radius = e.accuracy;
+            locMarker.remove();
+            locMarker = L.marker(e.latlng, {icon: locIcon}).addTo(map);
+            locCircle.remove();
+            locCircle = L.circle(e.latlng, radius, {
+              weight: 0.2,
+              fillOpacity: 0.05
+            }).addTo(map);
+            cLoc = e.latlng;
+          ;}
+          function onLocationError(e) {
+            alert(e.message);
+          }
+
+          map.on('locationerror', onLocationError);
+          map.on('locationfound', onLocationFound);
+
+      }
+    </script>
+  </head>
+  <body onload="init();">
+    <div id="map"></div>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Touge.Pro</title>
+    <link rel="stylesheet" href="/static/ol.css" type="text/css">
+    <script src="/static/ol.js"></script>
+    <style>
+      html body .map {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
+      }
+    </style>
+
+
+    <script>
+      var basePos = [-9.4188726,38.7810426];
+      var baseZoom = 11;
+      var tileServer = "";
+      function CenterControl(){};
+      function init() {
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            }),
+            new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    url: "https://touge.pro/geo.json",
+                    format: new ol.format.GeoJSON({
+                        extractStyles: true
+                    })
+                })
+            })
+            ],
+            view: new ol.View({
+            center: ol.proj.fromLonLat(basePos),
+            zoom: baseZoom
+            })
+        });
+      }
+    </script>
+  </head>
+  <body onload="init();">
+    <div id="map" class="map"></div>
+  </body>
+</html>
